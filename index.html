@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Fireworks</title>
+    <link rel="shortcut icon" href="./img/hearts.png" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("heartCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Heart {
+            constructor(x, y, size, color, speedX, speedY) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.speedX = speedX;
+                this.speedY = speedY;
+                this.alpha = 1;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.bezierCurveTo(this.x - this.size, this.y - this.size, this.x - this.size * 1.5, this.y + this.size / 2, this.x, this.y + this.size);
+                ctx.bezierCurveTo(this.x + this.size * 1.5, this.y + this.size / 2, this.x + this.size, this.y - this.size, this.x, this.y);
+                ctx.fill();
+                ctx.restore();
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.02;
+            }
+        }
+
+        let hearts = [];
+        function createExplosion(x, y) {
+            for (let i = 0; i < 20; i++) {
+                let size = Math.random() * 10 + 5;
+                let speedX = (Math.random() - 0.5) * 4;
+                let speedY = (Math.random() - 0.5) * 4;
+                let color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                hearts.push(new Heart(x, y, size, color, speedX, speedY));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach((heart, index) => {
+                heart.update();
+                heart.draw();
+                if (heart.alpha <= 0) hearts.splice(index, 1);
+            });
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener("click", (e) => {
+            createExplosion(e.clientX, e.clientY);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
